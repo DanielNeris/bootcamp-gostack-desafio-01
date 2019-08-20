@@ -27,11 +27,24 @@ function countRequest(req, res, next) {
     return next();
 }
 
-routes.get('/projects', countRequest, ProjectController.index);
-routes.post('/projects', countRequest, ProjectController.store);
-routes.put('/projects/:id', countRequest, checkProjectExist, ProjectController.update);
-routes.delete('/projects/:id', countRequest, checkProjectExist, ProjectController.delete);
+function checkProjectInArray(req, res, next) {
+    const { id } = req.body;
 
-routes.post('/projects/:id/tasks', countRequest, checkProjectExist, ProjectController.tasks);
+    const project = projects.find(p => p.id == id);
+
+    if(project)
+        return res.status(400).json({ message: 'Project already exists' });
+
+    return next();
+}
+
+routes.use(countRequest);
+
+routes.get('/projects', ProjectController.index);
+routes.post('/projects', checkProjectInArray, ProjectController.store);
+routes.put('/projects/:id', checkProjectExist, ProjectController.update);
+routes.delete('/projects/:id', checkProjectExist, ProjectController.delete);
+
+routes.post('/projects/:id/tasks', checkProjectExist, ProjectController.tasks);
 
 module.exports = routes;
