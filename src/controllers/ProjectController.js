@@ -1,8 +1,4 @@
-const projects = [
-    { id: '1', title: 'New Project', tasks: ['New task'] },
-    { id: '2', title: 'New Project2', tasks: ['New task2', 'teste'] },
-    { id: '3', title: 'New Project3', tasks: ['New task3', 'teste3', 'teste3'] },
-];
+const projects = require('../config/projects');
 
 module.exports = {
     index(req, res) {
@@ -27,15 +23,15 @@ module.exports = {
         }
     },
 
-    update(req, res) {
+    tasks(req, res) {
         try {
-            const { id } = req.parms;
+            const { id } = req.params;
 
-            const { title, tasks } = req.body;
+            const { title } = req.body;
    
-            const project = { title, tasks };
+            const project = projects.find(p => p.id == id);
 
-            projects[id] = project;
+            project.tasks.push(title);
 
             return res.json(projects);
         } catch (error) {
@@ -43,12 +39,29 @@ module.exports = {
         }
     },
 
+    update(req, res) {
+        try {
+            const { id } = req.params;
+
+            const { title } = req.body;
+   
+            const project = projects.find(p => p.id == id);
+
+            project.title = title;
+
+            return res.json(project);
+        } catch (error) {
+            return res.status(400).json(error);
+        }
+    },
+
     delete(req, res) {
         try {
-            const { id } = req.parms;
-            console.log(id)
-   
-            projects.splice(id, 1);
+            const { id } = req.params;
+
+            const project = projects.findIndex(p => p.id == id);
+
+            projects.splice(project, 1);
 
             return res.json({ success: 'ok' });
         } catch (error) {
